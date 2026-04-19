@@ -5,9 +5,10 @@ import { useProfileStore } from "@/lib/store/useProfileStore";
 import { Button } from "@/components/ui/button";
 import PolicyResultCard from "@/components/organisms/PolicyResultCard";
 import NarrativePanel from "@/components/organisms/NarrativePanel";
+import FloatingChat from "@/components/organisms/FloatingChat";
 
 export default function ResultsTemplate() {
-  const { recommendationResult, sessionId } = useProfileStore();
+  const { recommendationResult } = useProfileStore();
 
   if (!recommendationResult) {
     return (
@@ -61,15 +62,12 @@ export default function ResultsTemplate() {
       <NarrativePanel narrative={rag_narrative} />
 
       <div className="mt-8 flex flex-wrap gap-4">
-        {sessionId && (
-          <Link href="/chat">
-            <Button>Ask Follow-up Questions</Button>
-          </Link>
-        )}
         <Link href="/profile">
           <Button variant="outline">Edit Profile</Button>
         </Link>
       </div>
+
+      <FloatingChat />
     </div>
   );
 }

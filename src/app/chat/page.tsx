@@ -1,5 +1,5 @@
-import ChatTemplate from "@/components/templates/ChatTemplate";
+import { redirect } from "next/navigation";
 
 export default function ChatPage() {
-  return <ChatTemplate />;
+  redirect("/results");
 }

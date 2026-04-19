@@ -35,6 +35,7 @@ interface ProfileState {
   markStepComplete: (step: number) => void;
   setRecommendationResult: (result: RecommendationResponse) => void;
   buildUserProfile: () => UserProfile;
+  loadFromDbRow: (row: Record<string, unknown>) => void;
   reset: () => void;
 }
 
@@ -139,6 +140,74 @@ export const useProfileStore = create<ProfileState>()(
             is_alcohol_consumer: state.lifestyle.is_alcohol_consumer ?? false,
           },
         };
+      },
+
+      loadFromDbRow: (row) => {
+        // Skip prefill if DB row has no meaningful profile data (e.g. fresh signup — only user_id/full_name set)
+        const hasData =
+          row.age != null ||
+          row.occupation != null ||
+          row.primary_goal != null ||
+          row.bmi != null;
+        if (!hasData) return;
+
+        // Only overwrite fields that have non-null values in DB. Preserve existing Zustand state otherwise.
+        const pick = <T,>(
+          current: T | undefined,
+          key: string
+        ): T | undefined => {
+          const v = row[key];
+          return v == null ? current : (v as T);
+        };
+
+        set((state) => ({
+          personal: {
+            age: pick(state.personal.age, "age"),
+            gender: pick(state.personal.gender, "gender"),
+            marital_status: pick(state.personal.marital_status, "marital_status"),
+            nationality: pick(state.personal.nationality, "nationality"),
+            country: pick(state.personal.country, "country"),
+            district: pick(state.personal.district, "district"),
+            city: pick(state.personal.city, "city"),
+            num_dependents: pick(state.personal.num_dependents, "num_dependents"),
+          },
+          occupation: {
+            occupation: pick(state.occupation.occupation, "occupation"),
+            employment_type: pick(state.occupation.employment_type, "employment_type"),
+            designation: pick(state.occupation.designation, "designation"),
+            hazardous_level: pick(state.occupation.hazardous_level, "hazardous_level"),
+            hazardous_activities: pick(state.occupation.hazardous_activities, "hazardous_activities"),
+            monthly_income_lkr: pick(state.occupation.monthly_income_lkr, "monthly_income_lkr"),
+            has_existing_insurance: pick(state.occupation.has_existing_insurance, "has_existing_insurance"),
+            current_insurance_status: pick(state.occupation.current_insurance_status, "current_insurance_status"),
+            employer_insurance_scheme: pick(state.occupation.employer_insurance_scheme, "employer_insurance_scheme"),
+          },
+          goals: {
+            primary_goal: pick(state.goals.primary_goal, "primary_goal"),
+            secondary_goal: pick(state.goals.secondary_goal, "secondary_goal"),
+            travel_history_high_risk: pick(state.goals.travel_history_high_risk, "travel_history_high_risk"),
+            dual_citizenship: pick(state.goals.dual_citizenship, "dual_citizenship"),
+            tax_regulatory_flags: pick(state.goals.tax_regulatory_flags, "tax_regulatory_flags"),
+            insurance_history_issues: pick(state.goals.insurance_history_issues, "insurance_history_issues"),
+          },
+          health: {
+            has_chronic_disease: pick(state.health.has_chronic_disease, "has_chronic_disease"),
+            has_cardiovascular: pick(state.health.has_cardiovascular, "has_cardiovascular"),
+            has_cancer: pick(state.health.has_cancer, "has_cancer"),
+            has_respiratory: pick(state.health.has_respiratory, "has_respiratory"),
+            has_neurological: pick(state.health.has_neurological, "has_neurological"),
+            has_gastrointestinal: pick(state.health.has_gastrointestinal, "has_gastrointestinal"),
+            has_musculoskeletal: pick(state.health.has_musculoskeletal, "has_musculoskeletal"),
+            has_infectious_sexual: pick(state.health.has_infectious_sexual, "has_infectious_sexual"),
+            recent_treatment_surgery: pick(state.health.recent_treatment_surgery, "recent_treatment_surgery"),
+            covid_related: pick(state.health.covid_related, "covid_related"),
+          },
+          lifestyle: {
+            bmi: pick(state.lifestyle.bmi, "bmi"),
+            is_smoker: pick(state.lifestyle.is_smoker, "is_smoker"),
+            is_alcohol_consumer: pick(state.lifestyle.is_alcohol_consumer, "is_alcohol_consumer"),
+          },
+        }));
       },
 
       reset: () => set(initialState),

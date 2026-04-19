@@ -1,8 +1,11 @@
 "use client";
 
+import { useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { useProfileStore } from "@/lib/store/useProfileStore";
 import { useRecommendation } from "@/lib/hooks/useRecommendation";
+import { useAuth } from "@/lib/hooks/useAuth";
+import { createSupabaseBrowserClient } from "@/lib/supabase/client";
 import StepperHeader from "@/components/organisms/StepperHeader";
 import ProgressBar from "@/components/atoms/ProgressBar";
 import PersonalInfoForm from "@/components/organisms/PersonalInfoForm";
@@ -23,9 +26,30 @@ const STEP_COMPONENTS = [
 
 export default function FormWizardTemplate() {
   const router = useRouter();
-  const { currentStep, buildUserProfile, setRecommendationResult, markStepComplete } =
-    useProfileStore();
+  const {
+    currentStep,
+    buildUserProfile,
+    setRecommendationResult,
+    markStepComplete,
+    loadFromDbRow,
+  } = useProfileStore();
   const recommendation = useRecommendation();
+  const { user } = useAuth();
+  const prefilled = useRef(false);
+
+  useEffect(() => {
+    if (!user || prefilled.current) return;
+    prefilled.current = true;
+    const supabase = createSupabaseBrowserClient();
+    supabase
+      .from("profiles")
+      .select("*")
+      .eq("user_id", user.id)
+      .maybeSingle()
+      .then(({ data }) => {
+        if (data) loadFromDbRow(data);
+      });
+  }, [user, loadFromDbRow]);
 
   const handleSubmit = async () => {
     const profile = buildUserProfile();

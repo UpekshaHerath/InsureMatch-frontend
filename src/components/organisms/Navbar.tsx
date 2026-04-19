@@ -3,15 +3,19 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
-
-const navLinks = [
-  { href: "/", label: "Home" },
-  { href: "/profile", label: "Get Recommendations" },
-  { href: "/policies", label: "Policies" },
-];
+import { useAuth } from "@/lib/hooks/useAuth";
+import { Button } from "@/components/ui/button";
+import UserMenu from "@/components/molecules/UserMenu";
 
 export default function Navbar() {
   const pathname = usePathname();
+  const { user, isAdmin, loading } = useAuth();
+
+  const links = [
+    { href: "/", label: "Home", show: !user },
+    { href: "/profile", label: "Get Recommendations", show: !!user },
+    { href: "/admin/policies", label: "Policies", show: isAdmin },
+  ].filter((l) => l.show);
 
   return (
     <header className="sticky top-0 z-50 w-full border-b border-border bg-white/95 backdrop-blur">
@@ -38,7 +42,7 @@ export default function Navbar() {
         </Link>
 
         <nav className="flex items-center gap-1">
-          {navLinks.map((link) => (
+          {links.map((link) => (
             <Link
               key={link.href}
               href={link.href}
@@ -52,6 +56,25 @@ export default function Navbar() {
               {link.label}
             </Link>
           ))}
+
+          {!loading && !user && (
+            <>
+              <Link href="/login">
+                <Button variant="ghost" size="sm">
+                  Sign in
+                </Button>
+              </Link>
+              <Link href="/signup">
+                <Button size="sm">Sign up</Button>
+              </Link>
+            </>
+          )}
+
+          {user && (
+            <div className="ml-2">
+              <UserMenu />
+            </div>
+          )}
         </nav>
       </div>
     </header>

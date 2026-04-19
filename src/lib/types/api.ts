@@ -127,6 +127,7 @@ export interface ChatRequest {
   session_id: string;
   message: string;
   user_profile?: UserProfile;
+  recommendation_context?: string;
 }
 
 export interface ChatResponse {

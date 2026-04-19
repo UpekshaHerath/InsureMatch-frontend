@@ -3,7 +3,6 @@
 import { useState, useRef, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
-import { ScrollArea } from "@/components/ui/scroll-area";
 import ChatBubble from "@/components/molecules/ChatBubble";
 import Spinner from "@/components/atoms/Spinner";
 
@@ -17,12 +16,14 @@ interface ChatWindowProps {
   messages: Message[];
   onSend: (message: string) => void;
   isLoading: boolean;
+  embedded?: boolean;
 }
 
 export default function ChatWindow({
   messages,
   onSend,
   isLoading,
+  embedded = false,
 }: ChatWindowProps) {
   const [input, setInput] = useState("");
   const scrollRef = useRef<HTMLDivElement>(null);
@@ -48,15 +49,26 @@ export default function ChatWindow({
   };
 
   return (
-    <div className="flex h-[600px] flex-col rounded-lg border border-border">
-      <div className="border-b border-border bg-accent/50 px-4 py-3">
-        <h3 className="font-medium">Chat with InsureMatch AI</h3>
-        <p className="text-xs text-muted-foreground">
-          Ask follow-up questions about your recommendations
-        </p>
-      </div>
+    <div
+      className={
+        embedded
+          ? "flex h-full flex-col"
+          : "flex h-[600px] flex-col rounded-lg border border-border"
+      }
+    >
+      {!embedded && (
+        <div className="border-b border-border bg-accent/50 px-4 py-3">
+          <h3 className="font-medium">Chat with InsureMatch AI</h3>
+          <p className="text-xs text-muted-foreground">
+            Ask follow-up questions about your recommendations
+          </p>
+        </div>
+      )}
 
-      <ScrollArea className="flex-1 p-4" ref={scrollRef}>
+      <div
+        ref={scrollRef}
+        className="flex-1 min-h-0 overflow-y-auto overflow-x-hidden p-4"
+      >
         <div className="space-y-4">
           {messages.length === 0 && (
             <p className="text-center text-sm text-muted-foreground py-8">
@@ -82,7 +94,7 @@ export default function ChatWindow({
             </div>
           )}
         </div>
-      </ScrollArea>
+      </div>
 
       <form
         onSubmit={handleSubmit}
