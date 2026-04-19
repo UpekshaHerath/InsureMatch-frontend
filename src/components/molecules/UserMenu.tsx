@@ -58,6 +58,12 @@ export default function UserMenu() {
             Admin · Policies
           </DropdownMenuItem>
         )}
+        {isAdmin && (
+          <DropdownMenuItem render={<Link href="/admin/riders" />}>
+            <Shield className="mr-2 h-4 w-4" />
+            Admin · Riders
+          </DropdownMenuItem>
+        )}
         <DropdownMenuSeparator />
         <DropdownMenuItem
           onClick={signOut}

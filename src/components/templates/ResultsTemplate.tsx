@@ -24,8 +24,13 @@ export default function ResultsTemplate() {
     );
   }
 
-  const { ranked_policies, explanations, rag_narrative, top_recommendation } =
-    recommendationResult;
+  const {
+    ranked_policies,
+    explanations,
+    rag_narrative,
+    top_recommendation,
+    rider_suggestions,
+  } = recommendationResult;
 
   return (
     <div className="mx-auto max-w-4xl px-4 py-8">
@@ -55,6 +60,7 @@ export default function ResultsTemplate() {
               (e) => e.policy_name === policy.policy_name
             )}
             rank={i + 1}
+            riderSuggestions={rider_suggestions?.[policy.policy_name]}
           />
         ))}
       </div>

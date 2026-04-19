@@ -15,6 +15,7 @@ export default function Navbar() {
     { href: "/", label: "Home", show: !user },
     { href: "/profile", label: "Get Recommendations", show: !!user },
     { href: "/admin/policies", label: "Policies", show: isAdmin },
+    { href: "/admin/riders", label: "Riders", show: isAdmin },
   ].filter((l) => l.show);
 
   return (

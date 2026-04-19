@@ -110,12 +110,46 @@ export interface PolicyExplanation {
   shap_summary: string;
 }
 
+export interface RiderRecommendation {
+  rider_name: string;
+  rider_code: string;
+  category: string;
+  description: string | null;
+  premium_level: number;
+  score: number;
+  reasons: string[];
+}
+
+export interface RiderMetadata {
+  rider_name: string;
+  rider_code: string;
+  category: string;
+  company: string | null;
+  description: string | null;
+  min_age: number;
+  max_age: number;
+  premium_level: number;
+  applicable_policies: string[];
+  target_goals: string[];
+  health_relevant: boolean;
+  hazard_relevant: boolean;
+  dependents_relevant: boolean;
+}
+
+export interface RiderIngestResponse {
+  message: string;
+  riders_extracted: number;
+  chunks_indexed: number;
+  riders: RiderMetadata[];
+}
+
 export interface RecommendationResponse {
   ranked_policies: PolicyScore[];
   top_recommendation: string;
   explanations: PolicyExplanation[];
   rag_narrative: string;
   session_id: string;
+  rider_suggestions: Record<string, RiderRecommendation[]>;
 }
 
 export interface RecommendationRequest {

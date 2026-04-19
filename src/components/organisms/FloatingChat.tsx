@@ -30,8 +30,33 @@ function buildRecommendationContext(r: RecommendationResponse | null): string {
         }${p.company ? `, ${p.company}` : ""}`
     )
     .join("\n");
-  const narrative = r.rag_narrative ? `\nAdvisor narrative:\n${r.rag_narrative}` : "";
-  return [top, ranked ? `Ranked policies:\n${ranked}` : "", narrative]
+
+  const riderBlocks: string[] = [];
+  if (r.rider_suggestions) {
+    for (const [policyName, riders] of Object.entries(r.rider_suggestions)) {
+      if (!riders || riders.length === 0) continue;
+      const lines = riders
+        .map(
+          (rd) =>
+            `  - ${rd.rider_name} (${rd.category}): ${
+              rd.reasons.length > 0 ? rd.reasons.join("; ") : "suits profile"
+            }`
+        )
+        .join("\n");
+      riderBlocks.push(`${policyName}:\n${lines}`);
+    }
+  }
+  const riderSection = riderBlocks.length
+    ? `Suggested riders per policy:\n${riderBlocks.join("\n")}`
+    : "";
+
+  const narrative = r.rag_narrative ? `Advisor narrative:\n${r.rag_narrative}` : "";
+  return [
+    top,
+    ranked ? `Ranked policies:\n${ranked}` : "",
+    riderSection,
+    narrative,
+  ]
     .filter(Boolean)
     .join("\n\n");
 }

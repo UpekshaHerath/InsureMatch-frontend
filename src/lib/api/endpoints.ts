@@ -4,5 +4,6 @@ export const ENDPOINTS = {
   EXPLAIN: "/api/explain",
   POLICIES: "/api/policies",
   INGEST: "/api/ingest",
+  RIDERS: "/api/riders",
   HEALTH: "/health",
 } as const;
