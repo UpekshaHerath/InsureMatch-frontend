@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { LogOut, User as UserIcon, Shield } from "lucide-react";
+import { LogOut, User as UserIcon } from "lucide-react";
 import { useAuth } from "@/lib/hooks/useAuth";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
@@ -13,7 +13,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 
 export default function UserMenu() {
-  const { user, isAdmin, signOut } = useAuth();
+  const { user, signOut } = useAuth();
   if (!user) return null;
 
   const meta = user.user_metadata as
@@ -52,18 +52,6 @@ export default function UserMenu() {
           <UserIcon className="mr-2 h-4 w-4" />
           Account
         </DropdownMenuItem>
-        {isAdmin && (
-          <DropdownMenuItem render={<Link href="/admin/policies" />}>
-            <Shield className="mr-2 h-4 w-4" />
-            Admin · Policies
-          </DropdownMenuItem>
-        )}
-        {isAdmin && (
-          <DropdownMenuItem render={<Link href="/admin/riders" />}>
-            <Shield className="mr-2 h-4 w-4" />
-            Admin · Riders
-          </DropdownMenuItem>
-        )}
         <DropdownMenuSeparator />
         <DropdownMenuItem
           onClick={signOut}
