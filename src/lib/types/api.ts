@@ -120,6 +120,13 @@ export interface RiderRecommendation {
   reasons: string[];
 }
 
+export interface InbuiltRider {
+  rider_name: string;
+  rider_code: string;
+  category: string;
+  description: string | null;
+}
+
 export interface RiderMetadata {
   rider_name: string;
   rider_code: string;
@@ -150,6 +157,7 @@ export interface RecommendationResponse {
   rag_narrative: string;
   session_id: string;
   rider_suggestions: Record<string, RiderRecommendation[]>;
+  inbuilt_riders?: Record<string, InbuiltRider[]>;
 }
 
 export interface RecommendationRequest {

@@ -30,6 +30,7 @@ export default function ResultsTemplate() {
     rag_narrative,
     top_recommendation,
     rider_suggestions,
+    inbuilt_riders,
   } = recommendationResult;
 
   return (
@@ -61,6 +62,7 @@ export default function ResultsTemplate() {
             )}
             rank={i + 1}
             riderSuggestions={rider_suggestions?.[policy.policy_name]}
+            inbuiltRiders={inbuilt_riders?.[policy.policy_name]}
           />
         ))}
       </div>

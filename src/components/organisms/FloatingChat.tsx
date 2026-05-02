@@ -31,6 +31,20 @@ function buildRecommendationContext(r: RecommendationResponse | null): string {
     )
     .join("\n");
 
+  const inbuiltBlocks: string[] = [];
+  if (r.inbuilt_riders) {
+    for (const [policyName, riders] of Object.entries(r.inbuilt_riders)) {
+      if (!riders || riders.length === 0) continue;
+      const lines = riders
+        .map((rd) => `  - ${rd.rider_name} (${rd.category}) — bundled`)
+        .join("\n");
+      inbuiltBlocks.push(`${policyName}:\n${lines}`);
+    }
+  }
+  const inbuiltSection = inbuiltBlocks.length
+    ? `Inbuilt riders per policy (already covered, do not re-suggest):\n${inbuiltBlocks.join("\n")}`
+    : "";
+
   const riderBlocks: string[] = [];
   if (r.rider_suggestions) {
     for (const [policyName, riders] of Object.entries(r.rider_suggestions)) {
@@ -47,13 +61,14 @@ function buildRecommendationContext(r: RecommendationResponse | null): string {
     }
   }
   const riderSection = riderBlocks.length
-    ? `Suggested riders per policy:\n${riderBlocks.join("\n")}`
+    ? `Recommended add-on riders per policy:\n${riderBlocks.join("\n")}`
     : "";
 
   const narrative = r.rag_narrative ? `Advisor narrative:\n${r.rag_narrative}` : "";
   return [
     top,
     ranked ? `Ranked policies:\n${ranked}` : "",
+    inbuiltSection,
     riderSection,
     narrative,
   ]

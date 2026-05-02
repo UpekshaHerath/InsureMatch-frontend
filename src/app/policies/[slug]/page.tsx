@@ -72,20 +72,69 @@ export default async function PolicyDetailPage({
         <div className="mb-4 flex items-end justify-between">
           <div>
             <h2 className="text-xl font-semibold text-secondary">
-              Available Riders
+              Inbuilt Riders
             </h2>
             <p className="text-sm text-muted-foreground">
-              Optional covers that can be attached to {policy.shortName ?? policy.name}.
+              Bundled with the base plan — no extra add-on cost.
             </p>
           </div>
           <span className="text-sm font-medium text-muted-foreground">
-            {policy.riders.length} total
+            {policy.inbuiltRiders.length} included
           </span>
         </div>
 
         <Separator className="mb-6" />
 
-        {policy.riders.length === 0 ? (
+        {policy.inbuiltRiders.length === 0 ? (
+          <Card>
+            <CardContent className="py-10 text-center text-sm text-muted-foreground">
+              No inbuilt riders mapped for this plan.
+            </CardContent>
+          </Card>
+        ) : (
+          <div className="grid gap-4 sm:grid-cols-2">
+            {policy.inbuiltRiders.map((rider) => (
+              <Card key={rider.id} className="border-emerald-200 bg-emerald-50/40">
+                <CardContent className="p-5">
+                  <div className="flex items-start justify-between gap-3">
+                    <div className="min-w-0">
+                      <h3 className="text-sm font-semibold text-emerald-900">
+                        {rider.name}
+                      </h3>
+                      <p className="mt-0.5 text-xs text-emerald-800/70">
+                        {rider.category}
+                      </p>
+                    </div>
+                    <Badge className="flex-shrink-0 bg-emerald-100 text-emerald-700 hover:bg-emerald-100">
+                      Included
+                    </Badge>
+                  </div>
+                  <p className="mt-3 text-sm text-emerald-900/80">{rider.summary}</p>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        )}
+      </section>
+
+      <section className="mt-10">
+        <div className="mb-4 flex items-end justify-between">
+          <div>
+            <h2 className="text-xl font-semibold text-secondary">
+              Additional Riders
+            </h2>
+            <p className="text-sm text-muted-foreground">
+              Optional add-ons that can be attached to {policy.shortName ?? policy.name}.
+            </p>
+          </div>
+          <span className="text-sm font-medium text-muted-foreground">
+            {policy.additionalRiders.length} optional
+          </span>
+        </div>
+
+        <Separator className="mb-6" />
+
+        {policy.additionalRiders.length === 0 ? (
           <Card>
             <CardContent className="py-10 text-center text-sm text-muted-foreground">
               This plan does not support optional rider attachments. The base
@@ -94,7 +143,7 @@ export default async function PolicyDetailPage({
           </Card>
         ) : (
           <div className="grid gap-4 sm:grid-cols-2">
-            {policy.riders.map((rider) => (
+            {policy.additionalRiders.map((rider) => (
               <Card key={rider.id} className="border-border">
                 <CardContent className="p-5">
                   <div className="flex items-start justify-between gap-3">
@@ -106,15 +155,9 @@ export default async function PolicyDetailPage({
                         {rider.category}
                       </p>
                     </div>
-                    {rider.builtIn ? (
-                      <Badge className="flex-shrink-0 bg-emerald-100 text-emerald-700 hover:bg-emerald-100">
-                        Built-in
-                      </Badge>
-                    ) : (
-                      <Badge variant="outline" className="flex-shrink-0">
-                        Optional
-                      </Badge>
-                    )}
+                    <Badge variant="outline" className="flex-shrink-0">
+                      Optional
+                    </Badge>
                   </div>
                   <p className="mt-3 text-sm text-slate-600">{rider.summary}</p>
                 </CardContent>
