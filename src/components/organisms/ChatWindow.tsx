@@ -80,7 +80,6 @@ export default function ChatWindow({
               key={i}
               message={msg.text}
               isUser={msg.isUser}
-              sources={msg.sources}
             />
           ))}
           {isLoading && (
