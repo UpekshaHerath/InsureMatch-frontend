@@ -15,6 +15,7 @@ interface Props {
 export default function RiderListTable({ riders }: Props) {
   const queryClient = useQueryClient();
   const [deletingCode, setDeletingCode] = useState<string | null>(null);
+  const [clearing, setClearing] = useState(false);
 
   if (riders.length === 0) {
     return (
@@ -36,8 +37,6 @@ export default function RiderListTable({ riders }: Props) {
       setDeletingCode(null);
     }
   }
-
-  const [clearing, setClearing] = useState(false);
 
   async function handleClearAll() {
     const riderCount = riders.length;
