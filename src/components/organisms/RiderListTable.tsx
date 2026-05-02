@@ -15,6 +15,7 @@ interface Props {
 export default function RiderListTable({ riders }: Props) {
   const queryClient = useQueryClient();
   const [deletingCode, setDeletingCode] = useState<string | null>(null);
+  const [clearing, setClearing] = useState(false);
 
   if (riders.length === 0) {
     return (
@@ -38,12 +39,21 @@ export default function RiderListTable({ riders }: Props) {
   }
 
   async function handleClearAll() {
-    if (!confirm("Wipe the entire rider catalog?")) return;
+    const riderCount = riders.length;
+    if (
+      !confirm(
+        `Remove ALL ${riderCount} rider${riderCount === 1 ? "" : "s"} from the system? You can re-upload them right after. Policies are preserved.`
+      )
+    )
+      return;
+    setClearing(true);
     try {
       await apiClient.delete(ENDPOINTS.RIDERS);
       await queryClient.invalidateQueries({ queryKey: ["riders"] });
     } catch {
       alert("Failed to clear rider catalog.");
+    } finally {
+      setClearing(false);
     }
   }
 
@@ -53,11 +63,12 @@ export default function RiderListTable({ riders }: Props) {
         <Button
           type="button"
           variant="outline"
-          size="sm"
           onClick={handleClearAll}
-          className="text-red-600 hover:text-red-700"
+          disabled={clearing}
+          className="border-red-200 text-red-600 hover:bg-red-50 hover:text-red-700"
         >
-          Clear all riders
+          <Trash2 className="mr-1.5 h-4 w-4" />
+          {clearing ? "Clearing…" : `Clear all riders (${riders.length})`}
         </Button>
       </div>
 

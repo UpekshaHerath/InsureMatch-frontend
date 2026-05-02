@@ -1,16 +1,16 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
-import { MessageCircle, X } from "lucide-react";
-import { useProfileStore } from "@/lib/store/useProfileStore";
+import { useEffect, useMemo, useRef, useState } from "react";
+import { usePathname } from "next/navigation";
+import { Sparkles, X } from "lucide-react";
+
+import { useAuth } from "@/lib/hooks/useAuth";
 import { useChat } from "@/lib/hooks/useChat";
 import ChatWindow from "@/components/organisms/ChatWindow";
-import type { RecommendationResponse } from "@/lib/types/api";
 
 interface Message {
   text: string;
   isUser: boolean;
-  sources?: string[];
 }
 
 const FAB_SIZE = 56;
@@ -18,74 +18,29 @@ const DRAG_THRESHOLD = 5;
 const MIN_DRAWER_W = 360;
 const DEFAULT_DRAWER_W = 420;
 
-function buildRecommendationContext(r: RecommendationResponse | null): string {
-  if (!r) return "";
-  const top = r.top_recommendation ? `Top recommendation: ${r.top_recommendation}` : "";
-  const ranked = r.ranked_policies
-    ?.slice(0, 5)
-    .map(
-      (p, i) =>
-        `${i + 1}. ${p.policy_name} — score ${(p.suitability_score * 100).toFixed(0)}%${
-          p.policy_type ? ` (${p.policy_type})` : ""
-        }${p.company ? `, ${p.company}` : ""}`
-    )
-    .join("\n");
-
-  const inbuiltBlocks: string[] = [];
-  if (r.inbuilt_riders) {
-    for (const [policyName, riders] of Object.entries(r.inbuilt_riders)) {
-      if (!riders || riders.length === 0) continue;
-      const lines = riders
-        .map((rd) => `  - ${rd.rider_name} (${rd.category}) — bundled`)
-        .join("\n");
-      inbuiltBlocks.push(`${policyName}:\n${lines}`);
-    }
-  }
-  const inbuiltSection = inbuiltBlocks.length
-    ? `Inbuilt riders per policy (already covered, do not re-suggest):\n${inbuiltBlocks.join("\n")}`
-    : "";
-
-  const riderBlocks: string[] = [];
-  if (r.rider_suggestions) {
-    for (const [policyName, riders] of Object.entries(r.rider_suggestions)) {
-      if (!riders || riders.length === 0) continue;
-      const lines = riders
-        .map(
-          (rd) =>
-            `  - ${rd.rider_name} (${rd.category}): ${
-              rd.reasons.length > 0 ? rd.reasons.join("; ") : "suits profile"
-            }`
-        )
-        .join("\n");
-      riderBlocks.push(`${policyName}:\n${lines}`);
-    }
-  }
-  const riderSection = riderBlocks.length
-    ? `Recommended add-on riders per policy:\n${riderBlocks.join("\n")}`
-    : "";
-
-  const narrative = r.rag_narrative ? `Advisor narrative:\n${r.rag_narrative}` : "";
-  return [
-    top,
-    ranked ? `Ranked policies:\n${ranked}` : "",
-    inbuiltSection,
-    riderSection,
-    narrative,
-  ]
-    .filter(Boolean)
-    .join("\n\n");
-}
-
 function clamp(n: number, min: number, max: number) {
   return Math.min(Math.max(n, min), max);
 }
 
-export default function FloatingChat() {
-  const { sessionId, recommendationResult, buildUserProfile } = useProfileStore();
+function uuid() {
+  if (typeof crypto !== "undefined" && "randomUUID" in crypto) {
+    return crypto.randomUUID();
+  }
+  return `prerec-${Date.now()}-${Math.random().toString(36).slice(2, 10)}`;
+}
+
+// Routes where the post-recommendation FloatingChat is mounted; hide here
+// so only one chat surface is visible at a time.
+const HIDE_ON_PREFIXES = ["/results"];
+
+export default function PreRecChat() {
+  const { user, loading } = useAuth();
+  const pathname = usePathname();
   const chat = useChat();
 
   const [open, setOpen] = useState(false);
   const [messages, setMessages] = useState<Message[]>([]);
+  const localSessionId = useMemo(() => uuid(), []);
 
   const [pos, setPos] = useState<{ x: number; y: number } | null>(null);
   const [drawerW, setDrawerW] = useState(DEFAULT_DRAWER_W);
@@ -98,7 +53,11 @@ export default function FloatingChat() {
     moved: boolean;
     pointerId: number;
   } | null>(null);
-  const resizeStartRef = useRef<{ startX: number; startW: number; pointerId: number } | null>(null);
+  const resizeStartRef = useRef<{
+    startX: number;
+    startW: number;
+    pointerId: number;
+  } | null>(null);
 
   useEffect(() => {
     if (pos !== null) return;
@@ -109,27 +68,31 @@ export default function FloatingChat() {
     });
   }, [pos]);
 
-  if (!sessionId) return null;
+  // Hide on routes where the post-recommendation chat owns the surface,
+  // and while auth is still resolving / when the visitor is not signed in.
+  const onPostRecRoute = HIDE_ON_PREFIXES.some(
+    (p) => pathname === p || pathname.startsWith(`${p}/`)
+  );
+  if (loading || !user || onPostRecRoute) return null;
 
   const handleSend = async (message: string) => {
     setMessages((prev) => [...prev, { text: message, isUser: true }]);
     try {
-      const profile = buildUserProfile();
-      const recommendation_context = buildRecommendationContext(recommendationResult);
       const result = await chat.mutateAsync({
-        session_id: sessionId,
+        session_id: localSessionId,
         message,
-        user_profile: profile,
-        recommendation_context,
       });
       setMessages((prev) => [
         ...prev,
-        { text: result.response, isUser: false, sources: result.sources },
+        { text: result.response, isUser: false },
       ]);
     } catch {
       setMessages((prev) => [
         ...prev,
-        { text: "Sorry, something went wrong. Please try again.", isUser: false },
+        {
+          text: "Sorry, something went wrong. Please try again.",
+          isUser: false,
+        },
       ]);
     }
   };
@@ -186,7 +149,7 @@ export default function FloatingChat() {
   const onResizePointerMove = (e: React.PointerEvent<HTMLDivElement>) => {
     const rs = resizeStartRef.current;
     if (!rs || rs.pointerId !== e.pointerId) return;
-    const dx = rs.startX - e.clientX; // drag left = grow
+    const dx = rs.startX - e.clientX;
     const maxW = Math.max(MIN_DRAWER_W, window.innerWidth - 24);
     setDrawerW(clamp(rs.startW + dx, MIN_DRAWER_W, maxW));
   };
@@ -207,11 +170,16 @@ export default function FloatingChat() {
           onPointerMove={onFabPointerMove}
           onPointerUp={onFabPointerUp}
           onPointerCancel={onFabPointerUp}
-          aria-label="Open chat (drag to move)"
-          style={{ left: pos.x, top: pos.y, width: FAB_SIZE, height: FAB_SIZE }}
-          className="fixed z-40 flex items-center justify-center rounded-full bg-primary text-primary-foreground shadow-lg ring-1 ring-black/5 transition hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 touch-none select-none cursor-grab active:cursor-grabbing"
+          aria-label="Open advisor chat (drag to move)"
+          style={{
+            left: pos.x,
+            top: pos.y,
+            width: FAB_SIZE,
+            height: FAB_SIZE,
+          }}
+          className="fixed z-40 flex items-center justify-center rounded-full bg-purple-600 text-white shadow-lg ring-1 ring-black/5 transition hover:bg-purple-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-purple-600 focus-visible:ring-offset-2 touch-none select-none cursor-grab active:cursor-grabbing"
         >
-          <MessageCircle className="h-6 w-6 pointer-events-none" />
+          <Sparkles className="h-6 w-6 pointer-events-none" />
         </button>
       )}
 
@@ -225,7 +193,7 @@ export default function FloatingChat() {
       <aside
         aria-hidden={!open}
         style={{ width: drawerW }}
-        className={`fixed right-0 top-0 bottom-0 z-50 flex flex-col border-l border-border bg-white shadow-2xl transition-transform duration-200 ease-out ${
+        className={`fixed right-0 top-0 bottom-0 z-50 flex flex-col border-l border-purple-200 bg-white shadow-2xl transition-transform duration-200 ease-out ${
           open ? "translate-x-0" : "translate-x-full"
         }`}
       >
@@ -237,23 +205,24 @@ export default function FloatingChat() {
           role="separator"
           aria-orientation="vertical"
           aria-label="Resize chat drawer"
-          className="absolute left-0 top-0 bottom-0 w-1.5 -translate-x-1/2 cursor-ew-resize bg-transparent hover:bg-primary/30 touch-none"
+          className="absolute left-0 top-0 bottom-0 w-1.5 -translate-x-1/2 cursor-ew-resize bg-transparent hover:bg-purple-400/40 touch-none"
         />
 
-        <div className="flex items-center justify-between border-b border-border bg-accent/50 px-4 py-3">
+        <div className="flex items-center justify-between border-b border-purple-200 bg-purple-50 px-4 py-3">
           <div>
-            <h3 className="text-sm font-semibold text-secondary">
-              InsureMatch AI
+            <h3 className="text-sm font-semibold text-purple-900 flex items-center gap-1.5">
+              <Sparkles className="h-4 w-4" />
+              Insurance Advisor
             </h3>
-            <p className="text-xs text-muted-foreground">
-              Ask about your recommendations
+            <p className="text-xs text-purple-700/80">
+              Ask anything before getting your recommendation
             </p>
           </div>
           <button
             type="button"
             onClick={() => setOpen(false)}
             aria-label="Close chat"
-            className="rounded-md p-1 text-muted-foreground hover:bg-muted hover:text-foreground"
+            className="rounded-md p-1 text-purple-700 hover:bg-purple-100 hover:text-purple-900"
           >
             <X className="h-4 w-4" />
           </button>
@@ -265,6 +234,8 @@ export default function FloatingChat() {
             onSend={handleSend}
             isLoading={chat.isPending}
             embedded
+            accent="purple"
+            emptyHint='e.g. "I am a cancer patient — which policy suits me?"'
           />
         </div>
       </aside>

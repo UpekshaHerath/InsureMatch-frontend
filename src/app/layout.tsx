@@ -4,6 +4,7 @@ import "./globals.css";
 import QueryProvider from "@/providers/QueryProvider";
 import Navbar from "@/components/organisms/Navbar";
 import Footer from "@/components/organisms/Footer";
+import PreRecChat from "@/components/organisms/PreRecChat";
 
 const poppins = Poppins({
   variable: "--font-sans",
@@ -38,6 +39,7 @@ export default function RootLayout({
           <Navbar />
           <main className="flex-1">{children}</main>
           <Footer />
+          <PreRecChat />
         </QueryProvider>
       </body>
     </html>

@@ -1,3 +1,9 @@
+"use client";
+
+import { useState } from "react";
+import { useQueryClient } from "@tanstack/react-query";
+import { Trash2 } from "lucide-react";
+
 import {
   Card,
   CardContent,
@@ -5,7 +11,10 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { POLICY_TYPE_LABELS } from "@/lib/utils/constants";
+import apiClient from "@/lib/api/client";
+import { ENDPOINTS } from "@/lib/api/endpoints";
 import type { PolicyListItem } from "@/lib/types/api";
 
 interface PolicyListTableProps {
@@ -13,6 +22,28 @@ interface PolicyListTableProps {
 }
 
 export default function PolicyListTable({ policies }: PolicyListTableProps) {
+  const queryClient = useQueryClient();
+  const [clearing, setClearing] = useState(false);
+
+  async function handleClearAll() {
+    const policyCount = policies.length;
+    if (
+      !confirm(
+        `Remove ALL ${policyCount} polic${policyCount === 1 ? "y" : "ies"} from the system? You can re-upload them right after. Riders are preserved.`
+      )
+    )
+      return;
+    setClearing(true);
+    try {
+      await apiClient.delete(ENDPOINTS.INGEST);
+      await queryClient.invalidateQueries({ queryKey: ["policies"] });
+    } catch {
+      alert("Failed to clear policy catalog.");
+    } finally {
+      setClearing(false);
+    }
+  }
+
   if (policies.length === 0) {
     return (
       <Card>
@@ -27,7 +58,23 @@ export default function PolicyListTable({ policies }: PolicyListTableProps) {
   }
 
   return (
-    <div className="overflow-hidden rounded-lg border border-border">
+    <div className="space-y-3">
+      <div className="flex justify-end">
+        <Button
+          type="button"
+          variant="outline"
+          onClick={handleClearAll}
+          disabled={clearing}
+          className="border-red-200 text-red-600 hover:bg-red-50 hover:text-red-700"
+        >
+          <Trash2 className="mr-1.5 h-4 w-4" />
+          {clearing
+            ? "Clearing…"
+            : `Clear all policies (${policies.length})`}
+        </Button>
+      </div>
+
+      <div className="overflow-hidden rounded-lg border border-border">
       <table className="w-full text-sm">
         <thead className="bg-muted/50">
           <tr>
@@ -59,6 +106,7 @@ export default function PolicyListTable({ policies }: PolicyListTableProps) {
           ))}
         </tbody>
       </table>
+      </div>
     </div>
   );
 }

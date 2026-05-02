@@ -12,11 +12,15 @@ interface Message {
   sources?: string[];
 }
 
+type Accent = "primary" | "purple";
+
 interface ChatWindowProps {
   messages: Message[];
   onSend: (message: string) => void;
   isLoading: boolean;
   embedded?: boolean;
+  accent?: Accent;
+  emptyHint?: string;
 }
 
 export default function ChatWindow({
@@ -24,6 +28,8 @@ export default function ChatWindow({
   onSend,
   isLoading,
   embedded = false,
+  accent = "primary",
+  emptyHint,
 }: ChatWindowProps) {
   const [input, setInput] = useState("");
   const scrollRef = useRef<HTMLDivElement>(null);
@@ -72,7 +78,7 @@ export default function ChatWindow({
         <div className="space-y-4">
           {messages.length === 0 && (
             <p className="text-center text-sm text-muted-foreground py-8">
-              Ask a question about your insurance recommendations...
+              {emptyHint ?? "Ask a question about your insurance recommendations..."}
             </p>
           )}
           {messages.map((msg, i) => (
@@ -80,7 +86,7 @@ export default function ChatWindow({
               key={i}
               message={msg.text}
               isUser={msg.isUser}
-              sources={msg.sources}
+              accent={accent}
             />
           ))}
           {isLoading && (
@@ -108,7 +114,15 @@ export default function ChatWindow({
           className="min-h-[44px] max-h-32 resize-none"
           rows={1}
         />
-        <Button type="submit" disabled={!input.trim() || isLoading}>
+        <Button
+          type="submit"
+          disabled={!input.trim() || isLoading}
+          className={
+            accent === "purple"
+              ? "bg-purple-600 text-white hover:bg-purple-700"
+              : undefined
+          }
+        >
           Send
         </Button>
       </form>
