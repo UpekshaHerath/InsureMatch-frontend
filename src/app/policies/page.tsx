@@ -24,7 +24,7 @@ export default function PoliciesPage() {
         <div className="mb-4 inline-flex items-center rounded-full border border-orange-200 bg-orange-50 px-4 py-1.5 text-sm font-medium text-orange-700">
           Union Assurance Catalogue
         </div>
-        <h1 className="text-3xl font-bold tracking-tight text-slate-900 sm:text-4xl">
+        <h1 className="text-2xl font-bold tracking-tight text-slate-900 sm:text-4xl">
           Browse Insurance Policies
         </h1>
         <p className="mt-4 text-base text-slate-600">
@@ -34,7 +34,7 @@ export default function PoliciesPage() {
         </p>
       </header>
 
-      <section className="mt-12 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+      <section className="mt-12 grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
         {UNION_POLICIES.map((policy) => (
           <Link
             key={policy.slug}

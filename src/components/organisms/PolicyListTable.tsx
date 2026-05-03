@@ -74,8 +74,8 @@ export default function PolicyListTable({ policies }: PolicyListTableProps) {
         </Button>
       </div>
 
-      <div className="overflow-hidden rounded-lg border border-border">
-      <table className="w-full text-sm">
+      <div className="overflow-x-auto rounded-lg border border-border">
+      <table className="w-full text-sm min-w-[560px]">
         <thead className="bg-muted/50">
           <tr>
             <th className="px-4 py-3 text-left font-medium">Policy Name</th>

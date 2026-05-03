@@ -37,13 +37,13 @@ export default function PolicyResultCard({
   return (
     <Card className="overflow-hidden">
       <CardHeader className="bg-accent/50 pb-4">
-        <div className="flex items-start justify-between">
-          <div className="flex items-center gap-3">
-            <span className="flex h-8 w-8 items-center justify-center rounded-full bg-primary text-sm font-bold text-primary-foreground">
+        <div className="flex flex-wrap items-start justify-between gap-2">
+          <div className="flex min-w-0 items-center gap-3">
+            <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-primary text-sm font-bold text-primary-foreground">
               {rank}
             </span>
-            <div>
-              <CardTitle className="text-lg">{policy.policy_name}</CardTitle>
+            <div className="min-w-0">
+              <CardTitle className="text-base leading-snug sm:text-lg">{policy.policy_name}</CardTitle>
               {policy.company && (
                 <p className="text-sm text-muted-foreground">
                   {policy.company}

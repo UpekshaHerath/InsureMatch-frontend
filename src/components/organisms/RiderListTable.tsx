@@ -73,7 +73,7 @@ export default function RiderListTable({ riders }: Props) {
       </div>
 
       <div className="overflow-x-auto rounded-md border border-border">
-        <table className="w-full text-sm">
+        <table className="w-full min-w-[640px] text-sm">
           <thead className="bg-muted/50 text-left">
             <tr>
               <th className="px-4 py-2 font-medium">Rider</th>

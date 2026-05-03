@@ -132,7 +132,7 @@ export default function SavedRecommendationCard({ rec }: Props) {
             No structured policy data stored for this entry.
           </p>
         ) : (
-          <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
             {top3.map((p) => (
               <PolicyMiniSummary
                 key={p.policy_name}

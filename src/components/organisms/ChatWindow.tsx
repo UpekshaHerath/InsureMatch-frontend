@@ -59,7 +59,7 @@ export default function ChatWindow({
       className={
         embedded
           ? "flex h-full flex-col"
-          : "flex h-[600px] flex-col rounded-lg border border-border"
+          : "flex h-[480px] flex-col rounded-lg border border-border sm:h-[600px]"
       }
     >
       {!embedded && (
@@ -104,7 +104,7 @@ export default function ChatWindow({
 
       <form
         onSubmit={handleSubmit}
-        className="border-t border-border p-4 flex gap-2"
+        className="border-t border-border p-3 flex gap-2 sm:p-4"
       >
         <Textarea
           value={input}

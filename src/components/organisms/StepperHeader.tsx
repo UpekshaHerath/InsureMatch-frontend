@@ -1,5 +1,7 @@
 "use client";
 
+import { Fragment } from "react";
+
 import StepIndicator from "@/components/molecules/StepIndicator";
 import { STEP_CONFIG } from "@/lib/utils/constants";
 import { useProfileStore } from "@/lib/store/useProfileStore";
@@ -13,31 +15,35 @@ export default function StepperHeader() {
     return "pending" as const;
   };
 
+  const lastIndex = STEP_CONFIG.length - 1;
+
   return (
-    <div className="w-full">
-      <div className="flex items-center justify-between">
+    <div className="w-full overflow-x-auto overflow-y-hidden md:overflow-visible">
+      <div className="flex items-start">
         {STEP_CONFIG.map((step, index) => (
-          <div key={index} className="flex items-center flex-1">
-            <StepIndicator
-              stepNumber={index + 1}
-              title={step.label}
-              state={getState(index)}
-              onClick={
-                completedSteps.includes(index) || index === currentStep
-                  ? () => setStep(index)
-                  : undefined
-              }
-            />
-            {index < STEP_CONFIG.length - 1 && (
+          <Fragment key={index}>
+            <div className="flex flex-col items-center">
+              <StepIndicator
+                stepNumber={index + 1}
+                title={step.label}
+                state={getState(index)}
+                onClick={
+                  completedSteps.includes(index) || index === currentStep
+                    ? () => setStep(index)
+                    : undefined
+                }
+              />
+            </div>
+            {index < lastIndex && (
               <div
-                className={`flex-1 h-0.5 mx-2 ${
+                className={`mt-[18px] mx-1 h-0.5 min-w-[8px] flex-1 sm:mx-2 ${
                   completedSteps.includes(index)
                     ? "bg-green-500"
                     : "bg-muted"
                 }`}
               />
             )}
-          </div>
+          </Fragment>
         ))}
       </div>
     </div>

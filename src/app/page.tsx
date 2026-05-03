@@ -7,12 +7,12 @@ export default function Home() {
       {/* Hero */}
       <section className="relative overflow-hidden bg-white">
         <div className="absolute inset-0 bg-gradient-to-br from-orange-50 via-white to-white" />
-        <div className="relative mx-auto max-w-7xl px-4 py-24 sm:px-6 sm:py-32 lg:px-8">
+        <div className="relative mx-auto max-w-7xl px-4 py-12 sm:px-6 sm:py-32 lg:px-8">
           <div className="mx-auto max-w-2xl text-center">
             <div className="mb-6 inline-flex items-center rounded-full border border-orange-200 bg-orange-50 px-4 py-1.5 text-sm font-medium text-orange-700">
               Powered by AI
             </div>
-            <h1 className="text-4xl font-bold tracking-tight text-slate-900 sm:text-5xl lg:text-6xl">
+            <h1 className="text-3xl font-bold tracking-tight text-slate-900 sm:text-5xl lg:text-6xl">
               Find Your Perfect{" "}
               <span className="text-primary">Insurance Match</span>
             </h1>
@@ -21,14 +21,14 @@ export default function Home() {
               available policies, rank them by suitability, and explain exactly
               why each one fits your needs.
             </p>
-            <div className="mt-10 flex items-center justify-center gap-4">
-              <Link href="/profile">
-                <Button size="lg" className="px-8 text-base">
+            <div className="mt-10 flex flex-col items-center justify-center gap-3 sm:flex-row sm:gap-4">
+              <Link href="/profile" className="w-full sm:w-auto">
+                <Button size="lg" className="w-full px-8 text-base sm:w-auto">
                   Get Started
                 </Button>
               </Link>
-              <Link href="/policies">
-                <Button variant="outline" size="lg" className="text-base">
+              <Link href="/policies" className="w-full sm:w-auto">
+                <Button variant="outline" size="lg" className="w-full text-base sm:w-auto">
                   Browse Policies
                 </Button>
               </Link>
@@ -38,12 +38,12 @@ export default function Home() {
       </section>
 
       {/* Features */}
-      <section className="border-t border-border bg-slate-50 py-20">
+      <section className="border-t border-border bg-slate-50 py-10 sm:py-20">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-          <h2 className="text-center text-2xl font-bold text-slate-900 sm:text-3xl">
+          <h2 className="text-center text-xl font-bold text-slate-900 sm:text-3xl">
             How It Works
           </h2>
-          <div className="mt-12 grid gap-8 sm:grid-cols-3">
+          <div className="mt-12 grid grid-cols-1 gap-8 sm:grid-cols-3">
             <FeatureCard
               step="1"
               title="Complete Your Profile"
@@ -66,7 +66,7 @@ export default function Home() {
       {/* CTA */}
       <section className="bg-secondary py-16">
         <div className="mx-auto max-w-7xl px-4 text-center sm:px-6 lg:px-8">
-          <h2 className="text-2xl font-bold text-white sm:text-3xl">
+          <h2 className="text-xl font-bold text-white sm:text-3xl">
             Ready to find your ideal policy?
           </h2>
           <p className="mt-4 text-slate-300">

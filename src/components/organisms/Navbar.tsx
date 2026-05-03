@@ -1,7 +1,9 @@
 "use client";
 
+import { useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { Menu, X } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/lib/hooks/useAuth";
 import { Button } from "@/components/ui/button";
@@ -10,6 +12,7 @@ import UserMenu from "@/components/molecules/UserMenu";
 export default function Navbar() {
   const pathname = usePathname();
   const { user, isAdmin, loading } = useAuth();
+  const [mobileOpen, setMobileOpen] = useState(false);
 
   const links = [
     { href: "/", label: "Home", show: !user },
@@ -18,10 +21,12 @@ export default function Navbar() {
     { href: "/admin/riders", label: "Riders", show: isAdmin },
   ].filter((l) => l.show);
 
+  const closeMobile = () => setMobileOpen(false);
+
   return (
     <header className="sticky top-0 z-50 w-full border-b border-border bg-white/95 backdrop-blur">
       <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
-        <Link href="/" className="flex items-center gap-2">
+        <Link href="/" className="flex items-center gap-2" onClick={closeMobile}>
           <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary">
             <svg
               className="h-5 w-5 text-white"
@@ -42,7 +47,8 @@ export default function Navbar() {
           </span>
         </Link>
 
-        <nav className="flex items-center gap-1">
+        {/* Desktop nav */}
+        <nav className="hidden md:flex items-center gap-1">
           {links.map((link) => (
             <Link
               key={link.href}
@@ -77,7 +83,55 @@ export default function Navbar() {
             </div>
           )}
         </nav>
+
+        {/* Mobile: user menu (always visible) + hamburger */}
+        <div className="flex items-center gap-2 md:hidden">
+          {user && <UserMenu />}
+          <button
+            type="button"
+            aria-label={mobileOpen ? "Close menu" : "Open menu"}
+            aria-expanded={mobileOpen}
+            onClick={() => setMobileOpen((v) => !v)}
+            className="rounded-md p-2 text-muted-foreground hover:bg-accent hover:text-foreground"
+          >
+            {mobileOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
+          </button>
+        </div>
       </div>
+
+      {/* Mobile dropdown menu */}
+      {mobileOpen && (
+        <div className="md:hidden border-t border-border bg-white/95 px-4 py-3 space-y-1">
+          {links.map((link) => (
+            <Link
+              key={link.href}
+              href={link.href}
+              onClick={closeMobile}
+              className={cn(
+                "block rounded-md px-3 py-2 text-sm font-medium transition-colors",
+                pathname === link.href
+                  ? "bg-accent text-primary"
+                  : "text-muted-foreground hover:bg-accent hover:text-foreground"
+              )}
+            >
+              {link.label}
+            </Link>
+          ))}
+
+          {!loading && !user && (
+            <div className="flex flex-col gap-2 pt-2 border-t border-border">
+              <Link href="/login" onClick={closeMobile}>
+                <Button variant="ghost" size="sm" className="w-full justify-start">
+                  Sign in
+                </Button>
+              </Link>
+              <Link href="/signup" onClick={closeMobile}>
+                <Button size="sm" className="w-full">Sign up</Button>
+              </Link>
+            </div>
+          )}
+        </div>
+      )}
     </header>
   );
 }

@@ -215,7 +215,7 @@ export default function PolicyUploadForm() {
           </div>
 
           {/* Optional metadata */}
-          <div className="grid gap-4 sm:grid-cols-3">
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
             <div className="space-y-2">
               <Label htmlFor="policy-name">Policy name</Label>
               <Input
@@ -268,7 +268,7 @@ export default function PolicyUploadForm() {
           )}
 
           {/* Submit */}
-          <div className="flex items-center gap-3">
+          <div className="flex flex-wrap items-center gap-3">
             <Button
               type="submit"
               disabled={isUploading || !selectedFile}
