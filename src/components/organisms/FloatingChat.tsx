@@ -14,7 +14,7 @@ interface Message {
 }
 
 const FAB_SIZE = 56;
-const DRAG_THRESHOLD = 5;
+const DRAG_THRESHOLD = 8;
 const MIN_DRAWER_W = 360;
 const DEFAULT_DRAWER_W = 420;
 
@@ -98,6 +98,7 @@ export default function FloatingChat() {
     moved: boolean;
     pointerId: number;
   } | null>(null);
+  const justDraggedRef = useRef(false);
   const resizeStartRef = useRef<{ startX: number; startW: number; pointerId: number } | null>(null);
 
   useEffect(() => {
@@ -136,13 +137,13 @@ export default function FloatingChat() {
 
   // ── FAB drag handlers ────────────────────────────────────────────────────
   const onFabPointerDown = (e: React.PointerEvent<HTMLButtonElement>) => {
-    if (!pos) return;
     (e.target as HTMLElement).setPointerCapture(e.pointerId);
+    const rect = (e.currentTarget as HTMLElement).getBoundingClientRect();
     dragStateRef.current = {
       startX: e.clientX,
       startY: e.clientY,
-      origX: pos.x,
-      origY: pos.y,
+      origX: pos?.x ?? rect.left,
+      origY: pos?.y ?? rect.top,
       moved: false,
       pointerId: e.pointerId,
     };
@@ -166,10 +167,21 @@ export default function FloatingChat() {
   const onFabPointerUp = (e: React.PointerEvent<HTMLButtonElement>) => {
     const ds = dragStateRef.current;
     if (!ds || ds.pointerId !== e.pointerId) return;
-    (e.target as HTMLElement).releasePointerCapture(e.pointerId);
-    const wasDrag = ds.moved;
+    try {
+      (e.target as HTMLElement).releasePointerCapture(e.pointerId);
+    } catch {
+      // capture may already be released
+    }
+    justDraggedRef.current = ds.moved;
     dragStateRef.current = null;
-    if (!wasDrag) setOpen(true);
+  };
+
+  const onFabClick = () => {
+    if (justDraggedRef.current) {
+      justDraggedRef.current = false;
+      return;
+    }
+    setOpen(true);
   };
 
   // ── Drawer resize handlers ───────────────────────────────────────────────
@@ -198,17 +210,27 @@ export default function FloatingChat() {
     resizeStartRef.current = null;
   };
 
+  const fabStyle: React.CSSProperties = pos
+    ? { left: pos.x, top: pos.y, width: FAB_SIZE, height: FAB_SIZE }
+    : {
+        right: "max(1rem, env(safe-area-inset-right))",
+        bottom: "max(1rem, env(safe-area-inset-bottom))",
+        width: FAB_SIZE,
+        height: FAB_SIZE,
+      };
+
   return (
     <>
-      {pos && (
+      {!open && (
         <button
           type="button"
           onPointerDown={onFabPointerDown}
           onPointerMove={onFabPointerMove}
           onPointerUp={onFabPointerUp}
           onPointerCancel={onFabPointerUp}
+          onClick={onFabClick}
           aria-label="Open chat (drag to move)"
-          style={{ left: pos.x, top: pos.y, width: FAB_SIZE, height: FAB_SIZE }}
+          style={fabStyle}
           className="fixed z-40 flex items-center justify-center rounded-full bg-primary text-primary-foreground shadow-lg ring-1 ring-black/5 transition hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 touch-none select-none cursor-grab active:cursor-grabbing"
         >
           <MessageCircle className="h-6 w-6 pointer-events-none" />
@@ -238,7 +260,7 @@ export default function FloatingChat() {
           role="separator"
           aria-orientation="vertical"
           aria-label="Resize chat drawer"
-          className="absolute left-0 top-0 bottom-0 w-1.5 -translate-x-1/2 cursor-ew-resize bg-transparent hover:bg-primary/30 touch-none"
+          className="absolute left-0 top-0 bottom-0 w-1.5 -translate-x-1/2 cursor-ew-resize bg-transparent hover:bg-primary/30 touch-none hidden md:block"
         />
 
         <div className="flex items-center justify-between border-b border-border bg-accent/50 px-4 py-3">
