@@ -1,5 +1,6 @@
 export const ENDPOINTS = {
   RECOMMEND: "/api/recommend",
+  RECOMMENDATIONS: "/api/recommendations",
   CHAT: "/api/chat",
   EXPLAIN: "/api/explain",
   POLICIES: "/api/policies",

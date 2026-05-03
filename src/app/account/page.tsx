@@ -1,46 +1,35 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import Link from "next/link";
+import { ChevronLeft, ChevronRight } from "lucide-react";
 
-import { createSupabaseBrowserClient } from "@/lib/supabase/client";
 import { useAuth } from "@/lib/hooks/useAuth";
+import { usePastRecommendations } from "@/lib/hooks/usePastRecommendations";
 import { Button } from "@/components/ui/button";
 import Spinner from "@/components/atoms/Spinner";
-import SavedRecommendationCard, {
-  type SavedRecommendation,
-} from "@/components/organisms/SavedRecommendationCard";
+import SavedRecommendationCard from "@/components/organisms/SavedRecommendationCard";
 
-const SELECT =
-  "id, top_recommendation, ranked_policies, explanations, rider_suggestions, created_at, session_id";
+const PAGE_SIZE = 5;
 
 export default function AccountPage() {
   const { user, loading: authLoading } = useAuth();
-  const [recs, setRecs] = useState<SavedRecommendation[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [err, setErr] = useState<string | null>(null);
+  const [page, setPage] = useState(1);
 
-  useEffect(() => {
-    if (!user) return;
-    const supabase = createSupabaseBrowserClient();
-    supabase
-      .from("recommendations")
-      .select(SELECT)
-      .order("created_at", { ascending: false })
-      .limit(20)
-      .then(({ data, error }) => {
-        if (error) {
-          setErr(error.message || "Failed to load recommendations.");
-          setRecs([]);
-        } else {
-          setRecs((data as unknown as SavedRecommendation[]) || []);
-          setErr(null);
-        }
-        setLoading(false);
-      });
-  }, [user]);
+  const { data, isLoading, isFetching, error } = usePastRecommendations(
+    page,
+    PAGE_SIZE,
+    Boolean(user)
+  );
 
-  if (authLoading || loading) {
+  const recs = data?.items ?? [];
+  const total = data?.total ?? 0;
+  const totalPages = Math.max(1, Math.ceil(total / PAGE_SIZE));
+  const showPager = total > PAGE_SIZE;
+  const errMsg =
+    error instanceof Error ? error.message : error ? String(error) : null;
+
+  if (authLoading || (isLoading && !data)) {
     return (
       <div className="flex justify-center py-16">
         <Spinner className="h-8 w-8" />
@@ -56,27 +45,31 @@ export default function AccountPage() {
       </div>
 
       <section aria-labelledby="past-recs-heading" className="space-y-4">
-        <div>
-          <h2
-            id="past-recs-heading"
-            className="text-xl font-semibold text-secondary"
-          >
-            Past recommendations
-          </h2>
-          <p className="text-sm text-muted-foreground">
-            Your top 3 ranked policies and the riders we suggested for each one.
-          </p>
+        <div className="flex flex-wrap items-end justify-between gap-2">
+          <div>
+            <h2
+              id="past-recs-heading"
+              className="text-xl font-semibold text-secondary"
+            >
+              Past recommendations
+            </h2>
+            <p className="text-sm text-muted-foreground">
+              Your top 3 ranked policies and the riders we suggested for each one.
+            </p>
+          </div>
+          {data && (
+            <p className="text-xs text-muted-foreground">
+              {total === 0
+                ? "0 saved"
+                : `Showing ${recs.length} of ${total} (page ${page} of ${totalPages})`}
+            </p>
+          )}
         </div>
 
-        {err && (
+        {errMsg && (
           <div className="rounded-md border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
             <p className="font-medium">Could not load recommendations.</p>
-            <p className="mt-1 break-words font-mono text-xs">{err}</p>
-            <p className="mt-2 text-xs text-red-700/80">
-              If this mentions a missing column, apply migration{" "}
-              <code>0003_inbuilt_riders.sql</code> in the Supabase SQL editor
-              and retry.
-            </p>
+            <p className="mt-1 break-words font-mono text-xs">{errMsg}</p>
           </div>
         )}
 
@@ -88,10 +81,43 @@ export default function AccountPage() {
             </Link>
           </div>
         ) : (
-          <div className="space-y-4">
+          <div
+            className={`space-y-4 ${isFetching ? "opacity-60 pointer-events-none" : ""}`}
+            aria-busy={isFetching}
+          >
             {recs.map((r) => (
               <SavedRecommendationCard key={r.id} rec={r} />
             ))}
+          </div>
+        )}
+
+        {showPager && (
+          <div className="flex items-center justify-between pt-2">
+            <p className="text-xs text-muted-foreground">
+              Page {page} of {totalPages} · {total} total
+            </p>
+            <div className="flex items-center gap-2">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setPage((p) => Math.max(1, p - 1))}
+                disabled={page <= 1 || isFetching}
+              >
+                <ChevronLeft className="h-4 w-4" />
+                Previous
+              </Button>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() =>
+                  setPage((p) => Math.min(totalPages, p + 1))
+                }
+                disabled={page >= totalPages || isFetching}
+              >
+                Next
+                <ChevronRight className="h-4 w-4" />
+              </Button>
+            </div>
           </div>
         )}
       </section>
