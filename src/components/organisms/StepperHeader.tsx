@@ -14,10 +14,10 @@ export default function StepperHeader() {
   };
 
   return (
-    <div className="w-full">
-      <div className="flex items-center justify-between">
+    <div className="w-full overflow-x-auto overflow-y-hidden md:overflow-visible">
+      <div className="flex min-w-0 items-center justify-between">
         {STEP_CONFIG.map((step, index) => (
-          <div key={index} className="flex items-center flex-1">
+          <div key={index} className="flex min-w-0 flex-1 items-center">
             <StepIndicator
               stepNumber={index + 1}
               title={step.label}
@@ -30,7 +30,7 @@ export default function StepperHeader() {
             />
             {index < STEP_CONFIG.length - 1 && (
               <div
-                className={`flex-1 h-0.5 mx-2 ${
+                className={`mx-1 h-0.5 min-w-[8px] flex-1 sm:mx-2 ${
                   completedSteps.includes(index)
                     ? "bg-green-500"
                     : "bg-muted"

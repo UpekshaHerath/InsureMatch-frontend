@@ -222,10 +222,11 @@ export default function FloatingChat() {
         />
       )}
 
+      {/* On mobile (<md) the drawer is full-width; on md+ use the draggable width */}
       <aside
         aria-hidden={!open}
-        style={{ width: drawerW }}
-        className={`fixed right-0 top-0 bottom-0 z-50 flex flex-col border-l border-border bg-white shadow-2xl transition-transform duration-200 ease-out ${
+        style={{ ["--drawer-w" as string]: `${drawerW}px` }}
+        className={`fixed right-0 top-0 bottom-0 z-50 flex flex-col border-l border-border bg-white shadow-2xl transition-transform duration-200 ease-out w-full md:w-[var(--drawer-w)] ${
           open ? "translate-x-0" : "translate-x-full"
         }`}
       >

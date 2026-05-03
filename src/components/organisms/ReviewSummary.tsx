@@ -53,7 +53,7 @@ export default function ReviewSummary({
         heading to go back and edit.
       </p>
 
-      <div className="grid gap-4 sm:grid-cols-2">
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
         <Card>
           <CardHeader className="pb-3">
             <CardTitle className="text-base">Personal Information</CardTitle>
@@ -178,9 +178,9 @@ export default function ReviewSummary({
 
 function Row({ label, value }: { label: string; value?: string }) {
   return (
-    <div className="flex justify-between">
-      <span className="text-muted-foreground">{label}</span>
-      <span className="font-medium">{value || "—"}</span>
+    <div className="flex min-w-0 justify-between gap-2">
+      <span className="shrink-0 text-muted-foreground">{label}</span>
+      <span className="min-w-0 truncate text-right font-medium">{value || "—"}</span>
     </div>
   );
 }

@@ -36,7 +36,7 @@ function LoginForm() {
   };
 
   return (
-    <div className="mx-auto max-w-md px-4 py-16">
+    <div className="mx-auto max-w-md px-4 py-8 sm:py-16">
       <Card>
         <CardHeader>
           <CardTitle>Sign in</CardTitle>

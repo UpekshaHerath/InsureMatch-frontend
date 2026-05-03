@@ -38,7 +38,7 @@ export default function AccountPage() {
   }
 
   return (
-    <div className="mx-auto max-w-5xl px-4 py-8 space-y-6">
+    <div className="mx-auto max-w-5xl px-4 py-4 space-y-6 sm:py-8">
       <div>
         <h1 className="text-2xl font-bold text-secondary">My Account</h1>
         <p className="text-muted-foreground">{user?.email}</p>
@@ -92,7 +92,7 @@ export default function AccountPage() {
         )}
 
         {showPager && (
-          <div className="flex items-center justify-between pt-2">
+          <div className="flex flex-wrap items-center justify-between gap-2 pt-2">
             <p className="text-xs text-muted-foreground">
               Page {page} of {totalPages} · {total} total
             </p>
