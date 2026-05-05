@@ -220,7 +220,7 @@ export default function PolicyUploadForm() {
               <Label htmlFor="policy-name">Policy name</Label>
               <Input
                 id="policy-name"
-                placeholder="e.g. AIA Smart Health"
+                placeholder="e.g. Union Health 360"
                 value={policyName}
                 onChange={(e) => setPolicyName(e.target.value)}
                 disabled={isUploading}
@@ -240,7 +240,7 @@ export default function PolicyUploadForm() {
               <Label htmlFor="company">Company</Label>
               <Input
                 id="company"
-                placeholder="e.g. AIA Insurance"
+                placeholder="e.g. Union Assurance"
                 value={company}
                 onChange={(e) => setCompany(e.target.value)}
                 disabled={isUploading}
